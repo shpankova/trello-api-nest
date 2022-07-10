@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
+import { BoardsModule } from './boards/boards.module';
+import { BoardEntity } from './boards/entities/board.entity';
 
 @Module({
   imports: [
@@ -19,13 +21,14 @@ import { UsersModule } from './users/users.module';
         username: config.get<string>('POSTGRES_USER'),
         password: config.get<string>('POSTGRES_PASSWORD'),
         database: config.get<string>('POSTGRES_DB'),
-        entities: [],
+        entities: [BoardEntity],
         synchronize: true,
         autoLoadEntities: true,
         logging: true,
       }),
     }),
     UsersModule,
+    BoardsModule,
   ],
   controllers: [],
   providers: [],
