@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { BoardsModule } from './boards/boards.module';
 import { BoardEntity } from './boards/entities/board.entity';
+import { CardsModule } from './cards/cards.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { BoardEntity } from './boards/entities/board.entity';
     }),
     UsersModule,
     BoardsModule,
+    CardsModule,
   ],
   controllers: [],
   providers: [],
