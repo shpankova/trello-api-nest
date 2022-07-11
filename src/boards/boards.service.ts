@@ -14,4 +14,12 @@ export class BoardsService {
   async createBoard(boardInput: CreateBoardInput): Promise<BoardEntity> {
     return await this.boardRepository.save({ ...boardInput });
   }
+
+  async findAllBoards(): Promise<BoardEntity[]> {
+    return await this.boardRepository.find();
+  }
+
+  async findBoardById(board_id: number): Promise<BoardEntity> {
+    return await this.boardRepository.findOne({ where: { board_id } });
+  }
 }
