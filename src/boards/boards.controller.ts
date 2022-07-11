@@ -25,17 +25,17 @@ export class BoardsController {
     return this.boardsService.findAllBoards();
   }
 
-  @Get('/:board_id')
+  @Get(':board_id')
   getById(@Param('board_id') board_id: number) {
     return this.boardsService.findBoardById(board_id);
   }
 
-  @Put('/:board_id')
+  @Put(':board_id')
   update(@Body() boardInput: UpdateBoardInput) {
     return this.boardsService.updateBoardById(boardInput);
   }
 
-  @Delete('/:board_id')
+  @Delete(':board_id')
   delete(@Param('board_id') board_id: number) {
     return this.boardsService.deleteBoard(board_id);
   }
