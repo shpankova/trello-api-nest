@@ -15,4 +15,9 @@ export class CardsService {
     const card = await this.cardRepository.save({ ...createCardInput });
     return card;
   }
+
+  async findCardById(card_id: number): Promise<CardEntity> {
+    const card = await this.cardRepository.findOne({ where: { card_id } });
+    return card;
+  }
 }
