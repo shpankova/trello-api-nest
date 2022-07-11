@@ -13,6 +13,14 @@ export class BoardsService {
   ) {}
 
   async createBoard(createBoardInput: CreateBoardInput): Promise<BoardEntity> {
+    const board = await this.boardRepository.findBy({
+      board_id: createBoardInput.board_id,
+    });
+
+    if (board[0]) {
+      throw new Error('Board exists');
+    }
+
     return await this.boardRepository.save({ ...createBoardInput });
   }
 
@@ -21,17 +29,21 @@ export class BoardsService {
   }
 
   async findBoardById(board_id: number): Promise<BoardEntity> {
-    return await this.boardRepository.findOne({ where: { board_id } });
+    const board = await this.boardRepository.findOne({ where: { board_id } });
+
+    if (!board) {
+      throw new Error('Nothing was found');
+    }
+
+    return board;
   }
 
   async updateBoardById(
+    board_id: number,
     updateBoardInput: UpdateBoardInput,
   ): Promise<BoardEntity> {
-    await this.boardRepository.update(
-      { board_id: updateBoardInput.board_id },
-      { ...updateBoardInput },
-    );
-    return await this.findBoardById(updateBoardInput.board_id);
+    await this.boardRepository.update({ board_id }, { ...updateBoardInput });
+    return await this.findBoardById(board_id);
   }
 
   async deleteBoard(board_id: number): Promise<BoardEntity> {
