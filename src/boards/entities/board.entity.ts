@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { CardEntity } from 'src/cards/entities/card.entity';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('boards')
 export class BoardEntity {
@@ -19,4 +20,10 @@ export class BoardEntity {
     default: () => 'CURRENT_TIMESTAMP',
   })
   created_at: Date;
+
+  @OneToMany(() => CardEntity, (cards: CardEntity) => cards.board_id, {
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE',
+  })
+  cards: Array<CardEntity>;
 }
