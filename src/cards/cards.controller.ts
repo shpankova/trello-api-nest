@@ -6,21 +6,26 @@ import {
   Get,
   Next,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Res,
+  UsePipes,
 } from '@nestjs/common';
 import { Response, NextFunction } from 'express';
+import { JoiValidatorPipe } from 'src/validation.pipe';
 import { CardsService } from './cards.service';
 import { CreateCardInput } from './inputs/create-cards.input';
 import { UpdateCardInput } from './inputs/update-cards.input';
+import { CardSchema } from './inputs/card.dto';
 
 @Controller('cards')
 export class CardsController {
   constructor(private readonly cardService: CardsService) {}
 
   @Post()
-  async create(
+  @UsePipes(new JoiValidatorPipe(CardSchema))
+  async createCard(
     @Body() cardInput: CreateCardInput,
     @Res() res: Response,
     @Next() next: NextFunction,
@@ -35,7 +40,7 @@ export class CardsController {
       });
     } catch (err) {
       if (err.message === 'Card exists') {
-        throw new BadRequestException('This board already exists');
+        throw new BadRequestException('This card already exists');
       } else {
         next(err);
       }
@@ -43,8 +48,8 @@ export class CardsController {
   }
 
   @Get(':id')
-  async findById(
-    @Param('id') id: number,
+  async findCardById(
+    @Param('id', ParseIntPipe) id: number,
     @Res() res: Response,
     @Next() next: NextFunction,
   ) {
@@ -64,8 +69,9 @@ export class CardsController {
   }
 
   @Put(':id')
-  async update(
-    @Param('id') id: number,
+  @UsePipes(new JoiValidatorPipe(CardSchema))
+  async updateCard(
+    @Param('id', ParseIntPipe) id: number,
     @Body() cardInput: UpdateCardInput,
     @Res() res: Response,
     @Next() next: NextFunction,
@@ -82,8 +88,8 @@ export class CardsController {
   }
 
   @Delete(':id')
-  async delete(
-    @Param('id') id: number,
+  async deleteCard(
+    @Param('id', ParseIntPipe) id: number,
     @Res() res: Response,
     @Next() next: NextFunction,
   ) {

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BoardEntity } from './entities/board.entity';
-import { CreateBoardInput } from './inputs/create-boards.input';
+import { CreateBoardInput } from './inputs/create-board.input';
 import { UpdateBoardInput } from './inputs/update-board.input';
 
 @Injectable()

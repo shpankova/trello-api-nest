@@ -6,13 +6,17 @@ import {
   Get,
   Next,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Res,
+  UsePipes,
 } from '@nestjs/common';
 import { Response, NextFunction } from 'express';
+import { JoiValidatorPipe } from 'src/validation.pipe';
 import { BoardsService } from './boards.service';
-import { CreateBoardInput } from './inputs/create-boards.input';
+import { BoardSchema } from './inputs/board.dto';
+import { CreateBoardInput } from './inputs/create-board.input';
 import { UpdateBoardInput } from './inputs/update-board.input';
 
 @Controller('boards')
@@ -20,7 +24,8 @@ export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 
   @Post()
-  async create(
+  @UsePipes(new JoiValidatorPipe(BoardSchema))
+  async createBoard(
     @Body() boardInput: CreateBoardInput,
     @Res() res: Response,
     @Next() next: NextFunction,
@@ -40,14 +45,9 @@ export class BoardsController {
     }
   }
 
-  @Get()
-  getAll() {
-    return this.boardsService.findAllBoards();
-  }
-
   @Get(':id')
-  async getById(
-    @Param('id') id: number,
+  async findBoardById(
+    @Param('id', ParseIntPipe) id: number,
     @Res() res: Response,
     @Next() next: NextFunction,
   ) {
@@ -67,8 +67,9 @@ export class BoardsController {
   }
 
   @Put(':id')
-  async update(
-    @Param('id') id: number,
+  @UsePipes(new JoiValidatorPipe(BoardSchema))
+  async updateBoard(
+    @Param('id', ParseIntPipe) id: number,
     @Body() boardInput: UpdateBoardInput,
     @Res() res: Response,
     @Next() next: NextFunction,
@@ -85,8 +86,8 @@ export class BoardsController {
   }
 
   @Delete(':id')
-  async delete(
-    @Param('id') id: number,
+  async deleteBoard(
+    @Param('id', ParseIntPipe) id: number,
     @Res() res: Response,
     @Next() next: NextFunction,
   ) {
