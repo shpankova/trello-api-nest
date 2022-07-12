@@ -1,0 +1,40 @@
+version: "3.0"
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:14
+    env_file:
+      - .development.env
+    environment:
+      - POSTGRES_PASSWORD=61665786
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=trello-api-docker
+    ports:
+      - 5431:5432
+    tty: true
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+  main:
+    container_name: main
+    build:
+      context: .
+    env_file:
+      - .development.env
+    volumes:
+      - .:/app
+      - ./app/node_modules
+    ports:
+      - 8000:8000
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+    depends_on:
+      - postgres
+    restart: always
+    links:
+      - postgres
+
+volumes:
+  pgdata:
