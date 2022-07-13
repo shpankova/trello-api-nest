@@ -1,10 +1,12 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersModule } from './users/users.module';
 import { BoardsModule } from './boards/boards.module';
 import { CardsModule } from './cards/cards.module';
 import { typeOrmAsyncConfig } from './config/typeorm-config';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -12,11 +14,10 @@ import { typeOrmAsyncConfig } from './config/typeorm-config';
       envFilePath: `.${process.env.NODE_ENV}.env`,
     }),
     TypeOrmModule.forRootAsync(typeOrmAsyncConfig),
-    UsersModule,
     BoardsModule,
     CardsModule,
+    AuthModule,
+    UserModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule {}
