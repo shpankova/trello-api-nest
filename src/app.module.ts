@@ -5,7 +5,6 @@ import { BoardsModule } from './boards/boards.module';
 import { CardsModule } from './cards/cards.module';
 import { typeOrmAsyncConfig } from './config/typeorm-config';
 import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -17,7 +16,6 @@ import { UserModule } from './user/user.module';
     BoardsModule,
     CardsModule,
     AuthModule,
-    UserModule,
   ],
 })
 export class AppModule {}
