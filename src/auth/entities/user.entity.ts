@@ -1,5 +1,4 @@
 import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { Role } from './role.enum';
 
 @Entity('user')
 export class UserEntity {
@@ -15,7 +14,7 @@ export class UserEntity {
   @Column({ type: String, nullable: true })
   hashedRt: string | null;
 
-  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  @Column('text')
   role: string;
 
   @BeforeInsert()

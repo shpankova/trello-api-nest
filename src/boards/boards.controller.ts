@@ -10,9 +10,14 @@ import {
   Post,
   Put,
   Res,
+  UseGuards,
   UsePipes,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import { Response, NextFunction } from 'express';
+import { Role } from 'src/auth/entities/role.enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { RolesGuard } from 'src/common/guards/roles.guard';
 import { JoiValidatorPipe } from 'src/validation.pipe';
 import { BoardsService } from './boards.service';
 import { BoardSchema } from './inputs/board.dto';
@@ -23,6 +28,8 @@ import { UpdateBoardInput } from './inputs/update-board.input';
 export class BoardsController {
   constructor(private readonly boardsService: BoardsService) {}
 
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post()
   @UsePipes(new JoiValidatorPipe(BoardSchema))
   async createBoard(
@@ -66,6 +73,8 @@ export class BoardsController {
     }
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Put(':id')
   @UsePipes(new JoiValidatorPipe(BoardSchema))
   async updateBoard(
@@ -85,6 +94,8 @@ export class BoardsController {
     }
   }
 
+  @Roles(Role.ADMIN)
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Delete(':id')
   async deleteBoard(
     @Param('id', ParseIntPipe) id: number,
