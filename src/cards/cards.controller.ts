@@ -83,7 +83,11 @@ export class CardsController {
         body: { card },
       });
     } catch (err) {
-      next(err);
+      if (err.message === 'Nothing was found') {
+        throw new BadRequestException('Nothing was found');
+      } else {
+        next(err);
+      }
     }
   }
 

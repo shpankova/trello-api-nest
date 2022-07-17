@@ -38,7 +38,11 @@ export class CardsService {
     updateCardInput: UpdateCardInput,
   ): Promise<CardEntity> {
     await this.cardRepository.update({ card_id }, { ...updateCardInput });
-    return await this.findCardById(card_id);
+    const card = await this.findCardById(card_id);
+    if (!card) {
+      throw new Error('Nothing was found');
+    }
+    return card;
   }
 
   async deleteCard(card_id: number): Promise<CardEntity> {
