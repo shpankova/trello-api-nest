@@ -16,6 +16,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Response, NextFunction } from 'express';
 import { Role } from 'src/auth/entities/role.enum';
+import { GetCurrentUserId } from 'src/common/decorators';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { JoiValidatorPipe } from 'src/validation.pipe';
@@ -76,15 +77,19 @@ export class BoardsController {
   @Roles(Role.ADMIN)
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Put(':id')
-  @UsePipes(new JoiValidatorPipe(BoardSchema))
   async updateBoard(
+    @GetCurrentUserId() userId: number,
     @Param('id', ParseIntPipe) id: number,
     @Body() boardInput: UpdateBoardInput,
     @Res() res: Response,
     @Next() next: NextFunction,
   ) {
     try {
-      const board = await this.boardsService.updateBoardById(id, boardInput);
+      const board = await this.boardsService.updateBoardById(
+        userId,
+        id,
+        boardInput,
+      );
       res.status(200).send({
         message: 'Board Updated Successfully!',
         body: { board },

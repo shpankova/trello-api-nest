@@ -3,4 +3,5 @@ export class UpdateBoardInput {
   color: string;
   description: string;
   board_id: number;
+  userId: number;
 }

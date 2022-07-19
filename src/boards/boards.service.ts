@@ -1,15 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BoardEntity } from './entities/board.entity';
 import { CreateBoardInput } from './inputs/create-board.input';
 import { UpdateBoardInput } from './inputs/update-board.input';
+import { ClientProxy } from '@nestjs/microservices';
+import { UserEntity } from 'src/auth/entities/user.entity';
 
 @Injectable()
 export class BoardsService {
   constructor(
     @InjectRepository(BoardEntity)
-    private readonly boardRepository: Repository<BoardEntity>,
+    private boardRepository: Repository<BoardEntity>,
+    @InjectRepository(UserEntity)
+    private authRepository: Repository<UserEntity>,
+    @Inject('MAIL_SERVICE')
+    private client: ClientProxy,
   ) {}
 
   async createBoard(createBoardInput: CreateBoardInput): Promise<BoardEntity> {
@@ -39,10 +45,16 @@ export class BoardsService {
   }
 
   async updateBoardById(
+    id: number,
     board_id: number,
     updateBoardInput: UpdateBoardInput,
   ): Promise<BoardEntity> {
     await this.boardRepository.update({ board_id }, { ...updateBoardInput });
+    const user = await this.authRepository.findOne({
+      where: { id },
+    });
+    const emailAddress = user.email;
+    this.client.emit({ cmd: 'send-message' }, { emailAddress });
     return await this.findBoardById(board_id);
   }
 
