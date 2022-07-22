@@ -6,12 +6,17 @@ import { UserEntity } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { AuthDto } from './dto';
 import { Tokens } from './types';
+import * as uuid from 'uuid';
+import { RefreshTokensEntity } from './entities/rt.entity';
 
 @Injectable()
 export class AuthService {
+  token = uuid.v4();
   constructor(
     @InjectRepository(UserEntity)
     private authRepository: Repository<UserEntity>,
+    @InjectRepository(RefreshTokensEntity)
+    private rtRepository: Repository<RefreshTokensEntity>,
     private jwtService: JwtService,
   ) {}
 
@@ -24,7 +29,9 @@ export class AuthService {
       role,
     });
     const tokens = await this.getTokens(newUser.id, newUser.role);
-    await this.updateRtHash(newUser.id, tokens.refresh_token);
+    const rt = await this.parseJwt(tokens.refresh_token);
+    const parsedRt = rt.sub;
+    await this.saveTokens(newUser.id, parsedRt);
     return tokens;
   }
 
@@ -41,37 +48,65 @@ export class AuthService {
       throw new ForbiddenException('Incorrect password');
     }
     const tokens = await this.getTokens(user.id, user.role);
-    await this.updateRtHash(user.id, tokens.refresh_token);
+    const rt = await this.parseJwt(tokens.refresh_token);
+    const parsedRt = rt.sub;
+    await this.updateRt(user.id, parsedRt);
     return tokens;
   }
 
   async logout(userId: number) {
-    await this.authRepository.update({ id: userId }, { hashedRt: null });
+    const user = await this.authRepository.findOne({
+      where: { id: userId },
+    });
+    await this.rtRepository.update({ userId: user.id }, { token: null });
   }
 
-  async refreshTokens(userId: number, rt: string) {
+  async refreshTokens(rt: string) {
+    const token = await this.rtRepository.findOne({
+      where: { token: rt },
+    });
+    const userId = token.userId;
     const user = await this.authRepository.findOne({
       where: { id: userId },
     });
     if (!user) {
       throw new ForbiddenException('Access denied');
     }
-    const rtMatches = await bcrypt.compare(rt, user.hashedRt);
-    if (!rtMatches) {
+
+    if (token.token !== rt) {
       throw new ForbiddenException('Access denied');
     }
     const tokens = await this.getTokens(user.id, user.role);
-    await this.updateRtHash(user.id, tokens.refresh_token);
+    const refreshToken = await this.parseJwt(tokens.refresh_token);
+    const parsedRt = refreshToken.sub;
+    await this.updateRt(user.id, parsedRt);
     return tokens;
   }
 
-  async updateRtHash(userId: number, rt: string) {
-    const hash = await this.hashData(rt);
-    await this.authRepository.update({ id: userId }, { hashedRt: hash });
+  async saveTokens(userId: number, token: string) {
+    await this.rtRepository.save({ userId, token });
+  }
+
+  async updateRt(userId: number, token: string) {
+    await this.rtRepository.update({ userId: userId }, { token });
   }
 
   hashData(data: string) {
     return bcrypt.hash(data, 10);
+  }
+
+  async parseJwt(token) {
+    const base64Url = token.split('.')[1];
+    const base64 = decodeURIComponent(
+      atob(base64Url)
+        .split('')
+        .map((c) => {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join(''),
+    );
+
+    return JSON.parse(base64);
   }
 
   async getTokens(userId: number, role: string): Promise<Tokens> {
@@ -88,8 +123,7 @@ export class AuthService {
       ),
       this.jwtService.signAsync(
         {
-          sub: userId,
-          role,
+          sub: this.token,
         },
         {
           secret: process.env.JWT_REFRESH_SECRET,

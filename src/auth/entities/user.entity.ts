@@ -1,24 +1,23 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { RefreshTokensEntity } from './rt.entity';
 
 @Entity('user')
 export class UserEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
+  @Column('varchar', { unique: true })
   email: string;
 
-  @Column('text')
+  @Column('varchar')
   password: string;
 
-  @Column({ type: String, nullable: true })
-  hashedRt: string | null;
-
-  @Column('text')
+  @Column('varchar')
   role: string;
 
-  @BeforeInsert()
-  emailToLowerCase() {
-    this.email = this.email.toLocaleLowerCase();
-  }
+  @OneToMany(
+    () => RefreshTokensEntity,
+    (refreshToken: RefreshTokensEntity) => refreshToken.user,
+  )
+  refreshTokens: RefreshTokensEntity[];
 }
