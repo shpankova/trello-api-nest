@@ -1,29 +1,22 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
-  Next,
   Param,
   ParseIntPipe,
   Post,
   Put,
-  Res,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Response, NextFunction } from 'express';
 import { Role } from 'src/auth/entities/role.enum';
 import { GetCurrentUserId } from 'src/common/decorators';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { RolesGuard } from 'src/common/guards/roles.guard';
-import { JoiValidatorPipe } from 'src/validation.pipe';
 import { BoardsService } from './boards.service';
-import { BoardSchema } from './inputs/board.dto';
-import { CreateBoardInput } from './inputs/create-board.input';
-import { UpdateBoardInput } from './inputs/update-board.input';
+import { CreateBoardDto } from './dto/create-board.dto';
+import { UpdateBoardDto } from './dto/update-board.dto';
 
 @Controller('boards')
 export class BoardsController {
@@ -32,46 +25,14 @@ export class BoardsController {
   @Roles(Role.ADMIN)
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Post()
-  @UsePipes(new JoiValidatorPipe(BoardSchema))
-  async createBoard(
-    @Body() boardInput: CreateBoardInput,
-    @Res() res: Response,
-    @Next() next: NextFunction,
-  ) {
-    try {
-      const board = await this.boardsService.createBoard(boardInput);
-      res.json({
-        message: 'Board added successfully!',
-        body: { board },
-      });
-    } catch (err) {
-      if (err.message === 'Board exists') {
-        throw new BadRequestException('This board already exists');
-      } else {
-        next(err);
-      }
-    }
+  async createBoard(@Body() dto: CreateBoardDto) {
+    return await this.boardsService.createBoard(dto);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
-  async findBoardById(
-    @Param('id', ParseIntPipe) id: number,
-    @Res() res: Response,
-    @Next() next: NextFunction,
-  ) {
-    try {
-      const board = await this.boardsService.findBoardById(id);
-      res.json({
-        message: 'Board found successfully!',
-        body: { board },
-      });
-    } catch (err) {
-      if (err.message === 'Nothing was found') {
-        throw new BadRequestException('Nothing was found');
-      } else {
-        next(err);
-      }
-    }
+  async findBoardById(@Param('id', ParseIntPipe) id: number) {
+    return await this.boardsService.findBoardById(id);
   }
 
   @Roles(Role.ADMIN)
@@ -80,41 +41,15 @@ export class BoardsController {
   async updateBoard(
     @GetCurrentUserId() userId: number,
     @Param('id', ParseIntPipe) id: number,
-    @Body() boardInput: UpdateBoardInput,
-    @Res() res: Response,
-    @Next() next: NextFunction,
+    @Body() dto: UpdateBoardDto,
   ) {
-    try {
-      const board = await this.boardsService.updateBoardById(
-        userId,
-        id,
-        boardInput,
-      );
-      res.status(200).send({
-        message: 'Board Updated Successfully!',
-        body: { board },
-      });
-    } catch (err) {
-      next(err);
-    }
+    return await this.boardsService.updateBoardById(userId, id, dto);
   }
 
   @Roles(Role.ADMIN)
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Delete(':id')
-  async deleteBoard(
-    @Param('id', ParseIntPipe) id: number,
-    @Res() res: Response,
-    @Next() next: NextFunction,
-  ) {
-    try {
-      const board = await this.boardsService.deleteBoard(id);
-      res.status(200).send({
-        message: 'Board deleted successfully!',
-        body: { board },
-      });
-    } catch (err) {
-      next(err);
-    }
+  async deleteBoard(@Param('id', ParseIntPipe) id: number) {
+    return await this.boardsService.deleteBoard(id);
   }
 }
