@@ -2,6 +2,7 @@ import { BoardEntity } from 'src/boards/entities/board.entity';
 import { CardEntity } from 'src/cards/entities/card.entity';
 import { UserEntity } from 'src/auth/entities/user.entity';
 import { DataSourceOptions } from 'typeorm';
+import { RefreshTokensEntity } from 'src/auth/entities/rt.entity';
 
 const databaseConfig: DataSourceOptions = {
   type: 'postgres',
@@ -10,7 +11,7 @@ const databaseConfig: DataSourceOptions = {
   username: 'postgres',
   password: '61665786',
   database: 'trello-api-docker',
-  entities: [BoardEntity, CardEntity, UserEntity],
+  entities: [BoardEntity, CardEntity, UserEntity, RefreshTokensEntity],
   migrations: ['dist/migration/*.js'],
   extra: {
     charset: 'utf8mb4_unicode_ci',
