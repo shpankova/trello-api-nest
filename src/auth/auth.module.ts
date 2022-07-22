@@ -4,11 +4,13 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
-import { AtStrategy, RtStrategy } from './strategies';
+import { AtStrategy } from './strategies';
 import { RolesGuard } from 'src/common/guards/roles.guard';
+import { RefreshTokensEntity } from './entities/rt.entity';
+import { RtStrategy } from './strategies/rt.strategy';
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserEntity, RefreshTokensEntity]),
     JwtModule.register({
       signOptions: { expiresIn: '15m' },
     }),
